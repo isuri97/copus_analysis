@@ -55,8 +55,8 @@ def run(args):
               "reprocess_input_data": True,
               "num_train_epochs": 3,
               "train_batch_size": args.batch_size,
-              "args.use_multiprocessing ": False,
-              "args.use_multiprocessing_for_evaluation" : False
+              "use_multiprocessing ": False,
+              "use_multiprocessing_for_evaluation" : False
               },
     )
 
