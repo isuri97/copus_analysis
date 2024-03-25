@@ -111,7 +111,6 @@ df_train, df_test = [x for _, x in df.groupby(df['document_id'] >= 1100)]
 print(df_train.count())
 print(df_test.count())
 
-
 df_train = df_train.dropna(subset=['sentence_id'])
 df_train = df_train.dropna(subset=['words'])
 df_train = df_train.dropna(subset=['labels'])
@@ -119,6 +118,15 @@ df_train = df_train.dropna(subset=['labels'])
 df_test = df_test.dropna(subset=['sentence_id'])
 df_test = df_test.dropna(subset=['words'])
 df_test = df_test.dropna(subset=['labels'])
+
+pattern = r'[\t\n.,?!-_]'
+df_test = df_test[~df_test['words'].str.contains(pattern, regex=True)]
+df_test = df_test.dropna(subset=['sentence_id', 'labels'])
+df_test.reset_index(drop=True, inplace=True)
+
+df_train = df_train[~df_train['words'].str.contains(pattern, regex=True)]
+df_train = df_train.dropna(subset=['sentence_id', 'labels'])
+df_train.reset_index(drop=True, inplace=True)
 
 print(df_train.shape)
 print(df_test.shape)
