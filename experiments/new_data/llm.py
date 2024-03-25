@@ -40,7 +40,7 @@ for sentence, gold_tags in zip(raw_sentences, gold_tags):
     # Do not provide any other explanation. Just return json object with the results.
 
     message = """
-            you must identify if there are Holocaust domain specific named entities respond as a json format of yes/no (depending on there is a metaphorical flower name
+            you must identify if there are Holocaust domain specific named entities respond as a json format of yes/no (depending on there is a holocaust specific name entity
             or not) and the list of names in a json object.
             Example json object : {Holocaust specific named entities : 'yes',Holocaust specific named entities = ['name1','name2']}
             Do not provide any other explanation. Just return json object with the results.
