@@ -25,7 +25,7 @@ def format_test_data(dataset):
 
 def load_data():
     # train, test = train_test_split(dataset, test_size=0.2, shuffle=True, random_state=777)
-    train = pd.read_csv('train_df1.csv', sep='\t', usecols=['words','labels','sentence_id' ])
+    train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
     test = pd.read_csv('test_df.csv', sep='\t', usecols=['words','labels','sentence_id'])
     train_df, evaluation = train_test_split(train, test_size=0.1, shuffle=True, random_state=777)
     test_sentences, gold_tags, raw_sentences = format_test_data(test)
