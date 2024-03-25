@@ -1,9 +1,13 @@
 import argparse
+import json
+import os
+
 import pandas as pd
 import torch
 from simpletransformers.ner import NERModel
 from sklearn.metrics import recall_score, precision_score, f1_score
 from sklearn.model_selection import train_test_split
+
 
 def print_information(predictions, real_values):
     labels = set(real_values)
@@ -24,12 +28,12 @@ def format_test_data(dataset):
     return sentences_id, word_list, label_list
 
 def load_data():
-    # train, test = train_test_split(dataset, test_size=0.2, shuffle=True, random_state=777)
     train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
-    test = pd.read_csv('test_df.csv', sep='\t', usecols=['words','labels','sentence_id'])
+    with open('test_df1.json', 'r') as file:
+        test = json.load(file)
     train_df, evaluation = train_test_split(train, test_size=0.1, shuffle=True, random_state=777)
-    test_sentences, gold_tags, raw_sentences = format_test_data(test)
-    return train_df, evaluation, test_sentences, gold_tags, raw_sentences
+    sentence_id, test_sentences, gold_tags = format_test_data(test)
+    return train_df, evaluation, gold_tags, test_sentences
 
 def resolve_predictions(predictions, gold_tags):
     flat_predictions = []
@@ -45,7 +49,7 @@ def resolve_predictions(predictions, gold_tags):
     return flat_predictions, flat_gold_tags
 
 def run(args):
-    train_df, eval_df, test_sentences, gold_tags, raw_sentences = load_data()
+    train_df, eval_df, test_sentences, gold_tags = load_data()
     model = NERModel(
         model_type=args.model_type,
         model_name=args.model_name,
@@ -69,9 +73,33 @@ def run(args):
     )
 
     model.train_model(train_df, eval_data=eval_df)
-    predictions, raw_outputs = model.predict(test_sentences, split_on_space=False)
-    flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
-    print_information(flat_predictions, flat_gold_values)
+
+    def chunk_list(lst, n):
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+
+    sentence_chunks = chunk_list(test_sentences, 50)
+
+    with open('predictions_results.txt', 'w') as f:
+        for chunk in sentence_chunks:
+            predictions, raw_outputs = model.predict(chunk, split_on_space=False)
+            flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
+            information = print_information(flat_predictions, flat_gold_values)
+
+            if information is not None and isinstance(information, str):
+                f.write(information)
+
+            if not information.endswith('\n'):
+                f.write('\n')
+            elif information is not None:
+                f.write(str(information))
+                f.write('\n')  # Add a newline character
+
+        # Add a newline between chunks for better readability
+        f.write('\n')
+    # predictions, raw_outputs = model.predict(test_sentences, split_on_space=False)
+    # flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
+    # print_information(flat_predictions, flat_gold_values)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -82,3 +110,4 @@ if __name__ == '__main__':
                         , type=int, default=8, required=False, help='batch_size')
     args = parser.parse_args()
     run(args)
+

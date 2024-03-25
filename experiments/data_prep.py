@@ -146,25 +146,25 @@ print(len(df_with_tags))
 df_test['words'] = df_test['words'].str.split()
 df_test['labels'] = df_test['labels'].str.split()
 
-# reduce 'o' label from the train set
-grouped_df_train = df_train.groupby('sentence_id').agg({'words': ' '.join, 'labels': ' '.join}).reset_index()
-print(grouped_df)
-df_train_with_tags = grouped_df_train[grouped_df_train['labels'].str.contains('B')]
-df_train_without_tags = grouped_df_train[~grouped_df_train['labels'].str.contains('B')]
-# combine 10% of all 'o' labels
-sampled_rows = df_train_without_tags.sample(frac=0.1, random_state=42)
-df_train = pd.concat([df_train_with_tags, sampled_rows], ignore_index=True)
-print(len(df_train_without_tags))
-print(len(df_train_with_tags))
+# # reduce 'o' label from the train set
+# grouped_df_train = df_train.groupby('sentence_id').agg({'words': ' '.join, 'labels': ' '.join}).reset_index()
+# print(grouped_df)
+# df_train_with_tags = grouped_df_train[grouped_df_train['labels'].str.contains('B')]
+# df_train_without_tags = grouped_df_train[~grouped_df_train['labels'].str.contains('B')]
+# # combine 10% of all 'o' labels
+# sampled_rows = df_train_without_tags.sample(frac=0.1, random_state=42)
+# df_train = pd.concat([df_train_with_tags, sampled_rows], ignore_index=True)
+# print(len(df_train_without_tags))
+# print(len(df_train_with_tags))
 
-df_train['words'] = df_train['words'].str.split()
-df_train['labels'] = df_train['labels'].str.split()
+# df_train['words'] = df_train['words'].str.split()
+# df_train['labels'] = df_train['labels'].str.split()
 
 # Remove empty strings and specific characters (such as tabs)
-df_train['words'] = [[word.replace('\t', '').strip() for word in sublist if word.strip()] for sublist in df_train['words']]
-df_train['labels'] = [[label for label, word in zip(sublist_labels, sublist_words) if word] for sublist_labels, sublist_words in zip(df_train['labels'], df_train['words'])]
+# df_train['words'] = [[word.replace('\t', '').strip() for word in sublist if word.strip()] for sublist in df_train['words']]
+# df_train['labels'] = [[label for label, word in zip(sublist_labels, sublist_words) if word] for sublist_labels, sublist_words in zip(df_train['labels'], df_train['words'])]
 
-df_train.to_csv('train_df1.csv', sep='\t', index=False)
+# df_train.to_csv('train_df1.csv', sep='\t', index=False)
 
 
 
@@ -186,10 +186,11 @@ df_train.to_csv('train_df1.csv', sep='\t', index=False)
 
 
 # df_test.to_csv('test_df1.csv', sep='\t', index=False)
-#
-# print(f'training set size {len(df_train)}')
-# print(f'test set size {len(df_test)}')
-#
+df_test.to_json('test_df1.json', orient='records')
+
+print(f'training set size {len(df_train)}')
+print(f'test set size {len(df_test)}')
+
 #
 #
 
