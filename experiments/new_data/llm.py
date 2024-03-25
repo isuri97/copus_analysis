@@ -14,6 +14,7 @@ client = OpenAI(
 
 train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
 raw_sentences = train.groupby('sentence_id')['words'].apply(lambda x: ' '.join(x) + '.').reset_index()
+print(raw_sentences)
 
 
 train_df, eval_df, test_sentences, gold_tags, raw_sentences = load_data()
@@ -39,7 +40,7 @@ for sentence, gold_tags in zip(raw_sentences, gold_tags):
     # Do not provide any other explanation. Just return json object with the results.
 
     message = """
-            you must identify if there are Holocaust domain specific named entities respond as a json format of yes/no (depending on there is a metaphorical flower name 
+            you must identify if there are Holocaust domain specific named entities respond as a json format of yes/no (depending on there is a metaphorical flower name
             or not) and the list of names in a json object.
             Example json object : {Holocaust specific named entities : 'yes',Holocaust specific named entities = ['name1','name2']}
             Do not provide any other explanation. Just return json object with the results.
