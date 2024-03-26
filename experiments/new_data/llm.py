@@ -13,8 +13,11 @@ client = OpenAI(
 )
 
 train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
-raw_sentences = train.groupby('sentence_id')['words'].apply(lambda x: ' '.join(x) + '.').reset_index()
-print(raw_sentences)
+grouped_data = train.groupby('sentence_id').agg({
+    'words': lambda x: ' '.join(x) + '.',  # Join words with a full stop
+    'labels': list  # Group labels as a list
+}).reset_index()
+print(grouped_data.words)
 
 
 train_df, eval_df, test_sentences, gold_tags, raw_sentences = load_data()
