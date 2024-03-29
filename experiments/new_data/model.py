@@ -28,7 +28,7 @@ def format_test_data(dataset):
     return sentences_id, word_list, label_list
 
 def load_data():
-    train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
+    train = pd.read_csv('train_df1.csv', sep='\t', usecols=['words','labels','sentence_id' ])
     with open('test_df1.json', 'r') as file:
         test = json.load(file)
     train_df, evaluation = train_test_split(train, test_size=0.1, shuffle=True, random_state=777)
