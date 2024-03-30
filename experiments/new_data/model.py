@@ -28,7 +28,7 @@ def format_test_data(dataset):
     return sentences_id, word_list, label_list
 
 def load_data():
-    train = pd.read_csv('train_df1.csv', sep='\t', usecols=['words','labels','sentence_id' ])
+    train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
     with open('test_df1.json', 'r') as file:
         test = json.load(file)
     train_df, evaluation = train_test_split(train, test_size=0.1, shuffle=True, random_state=777)
@@ -60,7 +60,7 @@ def run(args):
                           'B-SEA-OCEAN',
                           'I-SEA-OCEAN', 'I-CAMP', 'I-LOC', 'I-GHETTO', 'B-SPOUSAL', 'I-SPOUSAL', 'B-SHIP',
                           'I-SHIP', 'B-FOREST', 'I-FOREST', 'B-GROUP', 'I-GROUP', 'B-MOUNTAIN', 'I-MOUNTAIN','I-FAC','I-FAC',
-                'B-FAC','B-NORP','B-CARDINAL','B-PERCENT','B-QUANTITY','I-NORP','B-ORDINAL','B-WORK_OF_ART','B-MONEY','I-MONEY'
+                'B-FAC','B-NORP','B-CARDINAL','B-PERCENT','B-QUANTITY','I-NORP','B-ORDINAL','B-WORK_OF_ART','B-MONEY','I-MONEY','I-PERCENT'
 ],
         use_cuda=torch.cuda.is_available(),
         args={"overwrite_output_dir": True,
@@ -107,7 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_name', type=str, required=True, help='model_name_or_path', default="bert-base-cased")
     parser.add_argument('--model_type', type=str, required=True, help='model_type', default="bert")
     parser.add_argument('--batch_size'
-                        , type=int, default=8, required=False, help='batch_size')
+                        , type=int, default=4, required=False, help='batch_size')
     args = parser.parse_args()
     run(args)
 
