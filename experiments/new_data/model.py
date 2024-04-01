@@ -7,6 +7,8 @@ import torch
 from simpletransformers.ner import NERModel
 from sklearn.metrics import recall_score, precision_score, f1_score
 from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from contextlib import redirect_stdout
 
 
 def print_information(predictions, real_values):
@@ -74,32 +76,44 @@ def run(args):
 
     model.train_model(train_df, eval_data=eval_df)
 
-    def chunk_list(lst, n):
-        for i in range(0, len(lst), n):
-            yield lst[i:i + n]
+    # def chunk_list(lst, n):
+    #     for i in range(0, len(lst), n):
+    #         yield lst[i:i + n]
+    #
+    # sentence_chunks = chunk_list(test_sentences, 50)
+    #
+    # with open('predictions_results.txt', 'w') as f:
+    #     for chunk in sentence_chunks:
+    #         predictions, raw_outputs = model.predict(chunk, split_on_space=False)
+    #         flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
+    #         information = print_information(flat_predictions, flat_gold_values)
+    #
+    #         if information is not None and isinstance(information, str):
+    #             f.write(information)
+    #
+    #         # if not information.endswith('\n'):
+    #         #     f.write('\n')
+    #         # elif information is not None:
+    #         #     f.write(str(information))
+    #         #     f.write('\n')  # Add a newline character
+    #
+    #     # Add a newline between chunks for better readability
+    #     f.write('\n')
 
-    sentence_chunks = chunk_list(test_sentences, 50)
+    predictions, raw_outputs = model.predict(test_sentences, split_on_space=False)
+    flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
+    print_information(flat_predictions, flat_gold_values)
 
-    with open('predictions_results.txt', 'w') as f:
-        for chunk in sentence_chunks:
-            predictions, raw_outputs = model.predict(chunk, split_on_space=False)
-            flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
-            information = print_information(flat_predictions, flat_gold_values)
+    results, outputs, preds_list, truths, preds = model.eval_model(test_sentences)
+    truths, preds = model.eval_model(test_sentences)
+    preds_list = [tag for s in preds_list for tag in s]
+    ll = []
+    key_list = []
 
-            if information is not None and isinstance(information, str):
-                f.write(information)
+    with open('out.txt', 'w') as f:
+        with redirect_stdout(f):
+            print(metrics.classification_report(truths, preds, digits=4))
 
-            if not information.endswith('\n'):
-                f.write('\n')
-            elif information is not None:
-                f.write(str(information))
-                f.write('\n')  # Add a newline character
-
-        # Add a newline between chunks for better readability
-        f.write('\n')
-    # predictions, raw_outputs = model.predict(test_sentences, split_on_space=False)
-    # flat_predictions, flat_gold_values = resolve_predictions(predictions, gold_tags)
-    # print_information(flat_predictions, flat_gold_values)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
