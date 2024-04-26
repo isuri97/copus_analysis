@@ -18,6 +18,21 @@ def print_information(predictions, real_values):
     print("Weighted F1 Score {}".format(f1_score(real_values, predictions, average='weighted')))
     print("Macro F1 Score {}".format(f1_score(real_values, predictions, average='macro')))
 
+
+# def format_data(dataset):
+#     sentence_ids = []
+#     words = []
+#     labels = []
+#     sent_id = 0
+#     dataset = pd.DataFrame(dataset)
+#     for id, sent, tags in zip(dataset['sentence_id'], dataset['words'], dataset['labels']):
+#         sent_index = [sent_id] * len(tags)
+#         sentence_ids.extend(sent_index)
+#         words.extend(sent)
+#         labels.extend(tags)
+#         sent_id += 1
+#     return pd.DataFrame({'sentence_id': sentence_ids, 'words': words, 'labels': labels})
+
 def format_test_data(dataset):
     sentences_id = []
     word_list = []
@@ -31,10 +46,14 @@ def format_test_data(dataset):
 
 def load_data():
     train = pd.read_csv('tx-train.csv', sep='\t', usecols=['words','labels','sentence_id' ])
-    with open('test_df1.json', 'r') as file:
-        test = json.load(file)
+    with open('TEST-FINAL.json', 'r') as file:
+        dataset = json.load(file)
+
+    train_df, test = train_test_split(train, test_size=0.2, shuffle=True, random_state=777)
     train_df, evaluation = train_test_split(train, test_size=0.1, shuffle=True, random_state=777)
+    # train_df = format_data(train_df)
     sentence_id, test_sentences, gold_tags = format_test_data(test)
+    # eval_df = format_data(evaluation)
     return train_df, evaluation, gold_tags, test_sentences
 
 def resolve_predictions(predictions, gold_tags):
