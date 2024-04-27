@@ -21,7 +21,7 @@ parser.add_argument('--cuda_device', required=False, help='cuda device', default
 parser.add_argument('--train', required=False, help='train file', default='data/sample.txt')
 parser.add_argument('--lr', required=False, help='Learning Rate', default=4e-5)
 
-arguments = parser.parse_args()
+args = parser.parse_args()
 
 df_train = pd.read_csv('../experiments/new_data/tx-train.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
 df_test = pd.read_csv('../experiments/new_data/tx-train.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
@@ -79,16 +79,10 @@ words = df_test['words']
 sentence_ids = df_test['sentence_id']
 labels = df_test['labels']
 
-model_args = NERArgs()
-model_args.train_batch_size = 8
-model_args.eval_batch_size = 8
-model_args.overwrite_output_dir = True
-model_args.num_train_epochs = 1
-model_args.use_multiprocessing = False
-model_args.use_multiprocessing_for_evaluation = False
-model_args.classification_report = True
-# model_args.wandb_project="holo-ner"
-model_args.labels_list = ['O', 'B-DATE', 'B-PERSON', 'B-GPE', 'B-ORG', 'I-ORG', 'B-LANGUAGE',
+model = NERModel(
+        model_type=args.model_type,
+        model_name=args.model_name,
+        labels=['O', 'B-DATE', 'B-PERSON', 'B-GPE', 'B-ORG', 'I-ORG', 'B-LANGUAGE',
                           'B-EVENT', 'I-DATE', 'B-TIME', 'I-TIME', 'I-GPE', 'I-PERSON',
                           'B-MILITARY', 'I-MILITARY', 'B-CAMP', 'I-EVENT', 'I-CARDINAL', 'B-LAW', 'I-LAW',
                           'B-RIVER', 'I-RIVER', 'I-QUANTITY', 'B-STREET', 'I-STREET', 'B-LOC', 'B-GHETTO',
@@ -97,18 +91,15 @@ model_args.labels_list = ['O', 'B-DATE', 'B-PERSON', 'B-GPE', 'B-ORG', 'I-ORG', 
                           'I-SHIP', 'B-FOREST', 'I-FOREST', 'B-GROUP', 'I-GROUP', 'B-MOUNTAIN', 'I-MOUNTAIN','I-FAC','I-FAC',
                 'B-FAC','B-NORP','B-CARDINAL','B-PERCENT','B-QUANTITY','I-NORP','B-ORDINAL','B-WORK_OF_ART','B-MONEY','I-MONEY','I-PERCENT'
 ],
-model_args.learning_rate = float(arguments.lr)
-MODEL_NAME = arguments.model_name
-MODEL_TYPE = arguments.model_type
-cuda_device = int(arguments.cuda_device)
-# MODEL_TYPE, MODEL_NAME,
-model = NERModel(
-    MODEL_TYPE, MODEL_NAME,
-    use_cuda=torch.cuda.is_available(),
-    cuda_device=cuda_device,
-    args=model_args,
-)
-
+        use_cuda=torch.cuda.is_available(),
+        args={"overwrite_output_dir": True,
+              "reprocess_input_data": True,
+              "num_train_epochs": 1,
+              "train_batch_size": 8,
+              "use_multiprocessing ": False,
+              "use_multiprocessing_for_evaluation" : False
+              },
+    )
 
 model.train_model(df_train)
 # model.save_model()
@@ -127,7 +118,7 @@ df_test['original_test_set'] = truths
 df_test['predicted_set'] = preds
 
 
-def print_information(predictions, real_values):
+def print_information(real_values, predictions):
     labels = set(real_values)
     print("Weighted Recall {}".format(recall_score(real_values, predictions, average='weighted')))
     print("Weighted Precision {}".format(precision_score(real_values, predictions, average='weighted')))
@@ -137,4 +128,4 @@ def print_information(predictions, real_values):
 
 with open('out.txt', 'w') as f:
         with redirect_stdout(f):
-            print(metrics.classification_report(truths, preds, digits=4))
+            print(print_information(truths, preds, digits=4))
