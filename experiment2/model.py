@@ -18,32 +18,22 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--model_name', required=False, help='model name', default="bert")
 parser.add_argument('--model_type', required=False, help='model type', default="bert-base-cased")
 parser.add_argument('--cuda_device', required=False, help='cuda device', default=0)
-parser.add_argument('--train', required=False, help='train file', default='data/sample.txt')
 parser.add_argument('--lr', required=False, help='Learning Rate', default=4e-5)
 
 args = parser.parse_args()
 
+df_train = pd.read_csv('../data/wiener_train_data.csv', sep=',', encoding='utf-8')
+df_test = pd.read_csv('../data/wiener_test_data.csv', sep=',', encoding='utf-8')
 
-df1 = pd.read_csv('../data/wiener-t.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
+dftr = df_train.dropna(subset=['words'])
+dft = df_train.dropna(subset=['labels'])
 
-df_train = df1.dropna(subset=['sentence_id'])
-df_train = df1.dropna(subset=['words'])
-df_train = df1.dropna(subset=['labels'])
+dftr = df_test.dropna(subset=['words'])
+dft= df_test.dropna(subset=['labels'])
 
-document_ids = df_train['document_id'].unique()
-train_document_ids = document_ids[:100]
-test_document_ids = document_ids[100:150]
+print(f'training set size {len(dftr)}')
+print(f'test set size {len(dft)}')
 
-train_set = df_train[df_train['document_id'].isin(train_document_ids)]
-test_set = df_train[df_train['document_id'].isin(test_document_ids)]
-
-print(f'training set size {len(train_set)}')
-print(f'test set size {len(test_set)}')
-
-# concatenate words till . and add comma
-words = test_set['words']
-sentence_ids = test_set['sentence_id']
-labels = test_set['labels']
 
 model = NERModel(
         model_type=args.model_type,
@@ -67,21 +57,21 @@ model = NERModel(
               },
     )
 
-model.train_model(df_train)
+model.train_model(dftr)
 # model.save_model()
 
 # predictions, outputs = model.predict(sentences)
 
-print(len(test_set))
-results, outputs, preds_list, truths, preds = model.eval_model(test_set)
+print(len(dft))
+results, outputs, preds_list, truths, preds = model.eval_model(dft)
 # print(results)
 preds_list = [tag for s in preds_list for tag in s]
 ll = []
 key_list = []
 
 
-test_set['original_test_set'] = truths
-test_set['predicted_set'] = preds
+dft['original_test_set'] = truths
+dft['predicted_set'] = preds
 
 
 def print_information(real_values, predictions):
