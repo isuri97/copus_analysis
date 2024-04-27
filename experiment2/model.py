@@ -24,7 +24,7 @@ parser.add_argument('--lr', required=False, help='Learning Rate', default=4e-5)
 args = parser.parse_args()
 
 
-df1 = pd.read_csv('../data/wiener.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
+df1 = pd.read_csv('../data/wiener-t.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
 
 df_train = df1.dropna(subset=['sentence_id'])
 df_train = df1.dropna(subset=['words'])
