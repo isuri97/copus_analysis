@@ -128,4 +128,4 @@ def print_information(real_values, predictions):
 
 with open('out.txt', 'w') as f:
         with redirect_stdout(f):
-            print(print_information(truths, preds, digits=4))
+            print(print_information(truths, preds))
