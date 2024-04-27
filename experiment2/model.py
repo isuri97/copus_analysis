@@ -23,61 +23,27 @@ parser.add_argument('--lr', required=False, help='Learning Rate', default=4e-5)
 
 args = parser.parse_args()
 
-df_train = pd.read_csv('../experiments/new_data/tx-train.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
-df_test = pd.read_csv('../experiments/new_data/tx-train.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
 
-df_test.dropna(subset=['labels'], inplace=True)
+df1 = pd.read_csv('../data/wiener.csv', sep='\t', quoting=csv.QUOTE_NONE, encoding='utf-8')
 
-df_train = df_train.dropna(subset=['sentence_id'])
-df_train = df_train.dropna(subset=['words'])
-df_train = df_train.dropna(subset=['labels'])
+df_train = df1.dropna(subset=['sentence_id'])
+df_train = df1.dropna(subset=['words'])
+df_train = df1.dropna(subset=['labels'])
 
-df_test = df_test.dropna(subset=['sentence_id'])
-df_test = df_test.dropna(subset=['words'])
-df_test = df_test.dropna(subset=['labels'])
+document_ids = df_train['document_id'].unique()
+train_document_ids = document_ids[:100]
+test_document_ids = document_ids[100:150]
 
-# df_gold_train = df_gold_train.dropna(subset=['sentence_id'])
-# df_gold_train = df_gold_train.dropna(subset=['words'])
-# df_gold_train = df_gold_train.dropna(subset=['labels'])
+train_set = df_train[df_train['document_id'].isin(train_document_ids)]
+test_set = df_train[df_train['document_id'].isin(test_document_ids)]
 
-# df1 = pd.DataFrame({'document_id': df_train['document_id'], 'words': df_test['words'], 'labels': df_train['labels']})
-#
-# sentence_id_list = []
-#
-# sentence_id_seq = 0
-#
-# dropping_sentences = []
-#
-# for word in df1['words'].tolist():
-#     if word == "." or word == "?" or word == "!":
-#         sentence_id_list.append(sentence_id_seq)
-#         sentence_id_seq += 1
-#         word_count = 0
-#     else:
-#         sentence_id_list.append(sentence_id_seq)
-#
-# df1['sentence_id'] = sentence_id_list
-
-# sentence_ids = list(set(sentence_id_list))
-
-
-# sentence_ids_train, sentence_ids_test = train_test_split(sentence_ids, test_size=0.3)
-# df2 = df1[df1['sentence_id'] not in dropping_sentences]
-
-# df_train, df_test = [x for _, x in df1.groupby(df1['sentence_id'] >= 400)]
-
-# df_train = df1[df1["sentence_id"].isin(sentence_ids_train)]
-# df_test = df1[df1["sentence_id"].isin(sentence_ids_test)]  # train_test_split(df1, test_size=0.1)
-
-print(f'training set size {len(df_train)}')
-print(f'test set size {len(df_test)}')
-
-
+print(f'training set size {len(train_set)}')
+print(f'test set size {len(test_set)}')
 
 # concatenate words till . and add comma
-words = df_test['words']
-sentence_ids = df_test['sentence_id']
-labels = df_test['labels']
+words = test_set['words']
+sentence_ids = test_set['sentence_id']
+labels = test_set['labels']
 
 model = NERModel(
         model_type=args.model_type,
@@ -106,16 +72,16 @@ model.train_model(df_train)
 
 # predictions, outputs = model.predict(sentences)
 
-print(len(df_test))
-results, outputs, preds_list, truths, preds = model.eval_model(df_test)
+print(len(test_set))
+results, outputs, preds_list, truths, preds = model.eval_model(test_set)
 # print(results)
 preds_list = [tag for s in preds_list for tag in s]
 ll = []
 key_list = []
 
 
-df_test['original_test_set'] = truths
-df_test['predicted_set'] = preds
+test_set['original_test_set'] = truths
+test_set['predicted_set'] = preds
 
 
 def print_information(real_values, predictions):
